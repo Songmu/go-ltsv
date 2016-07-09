@@ -11,10 +11,10 @@ type Unmarshaler interface {
 	UnmarshalLTSV([]byte) error
 }
 
-// Loaderror is an error type for Load()
-type LoadError map[string]error
+// UnmarshalError is an error type for Unmarshal()
+type UnmarshalError map[string]error
 
-func (m LoadError) Error() string {
+func (m UnmarshalError) Error() string {
 	if len(m) == 0 {
 		return "(no error)"
 	}
@@ -28,7 +28,7 @@ func (m LoadError) Error() string {
 }
 
 // OfField returns the error correspoinding to a given field
-func (m LoadError) OfField(name string) error {
+func (m UnmarshalError) OfField(name string) error {
 	return m[name]
 }
 
@@ -59,6 +59,8 @@ func data2map(data []byte) (ltsvMap, error) {
 	return l, nil
 }
 
+// Unmarshal parses the LTSV-encoded data and stores the result
+// in the value pointed to by v.
 func Unmarshal(data []byte, v interface{}) error {
 	rv := reflect.ValueOf(v)
 	if rv.Kind() != reflect.Ptr {
@@ -89,7 +91,7 @@ func Unmarshal(data []byte, v interface{}) error {
 	}
 
 	t := rv.Type()
-	errs := LoadError{}
+	errs := UnmarshalError{}
 	for i := 0; i < t.NumField(); i++ {
 		ft := t.Field(i)
 		fv := rv.Field(i)
@@ -99,14 +101,13 @@ func Unmarshal(data []byte, v interface{}) error {
 		}
 
 		tag := ft.Tag.Get("ltsv")
-		if tag == "" {
-			continue
-		}
-
 		tags := strings.Split(tag, ",")
 		key := tags[0]
 		if key == "-" {
 			continue
+		}
+		if key == "" {
+			key = strings.ToLower(ft.Name)
 		}
 		s, ok := l[key]
 		if !ok {

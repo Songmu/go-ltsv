@@ -38,13 +38,15 @@ func TestUnmarshal(t *testing.T) {
 		User   string  `ltsv:"user"`
 		Age    uint8   `ltsv:"age"`
 		Height float64 `ltsv:"height"`
+		Weight float32
 	}
 	s := &ss{}
-	Unmarshal([]byte("user:songmu\tage:36\theight:169.1"), s)
+	Unmarshal([]byte("user:songmu\tage:36\theight:169.1\tweight:66.6"), s)
 	expect2 := &ss{
 		User:   "songmu",
 		Age:    36,
 		Height: 169.1,
+		Weight: 66.6,
 	}
 	if !reflect.DeepEqual(s, expect2) {
 		t.Errorf("result of data2map not expected: %#v", s)
