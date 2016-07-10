@@ -1,13 +1,15 @@
 package ltsv
 
 import (
+	"encoding"
 	"fmt"
 	"reflect"
+	"strconv"
 	"strings"
 )
 
 type Marshaler interface {
-	MarshalLTSV([]byte) error
+	MarshalLTSV() ([]byte, error)
 }
 
 // MarshalError is an error type for Marshal()
@@ -39,7 +41,7 @@ type MarshalTypeError struct {
 }
 
 func (e *MarshalTypeError) Error() string {
-	return "ltsv: cannot marshal " + e.Value + " into Go value of type " + e.Type.String()
+	return "ltsv: cannot marshal Go value " + e.Value + " of type " + e.Type.String() + " into ltsv"
 }
 
 func Marshal(v interface{}) ([]byte, error) {
@@ -65,5 +67,59 @@ func Marshal(v interface{}) ([]byte, error) {
 		}
 		return []byte(strings.Join(arr, "\t")), nil
 	}
-	return nil, nil
+
+	t := rv.Type()
+	numField := t.NumField()
+	arr := make([]string, 0, numField)
+	errs := MarshalError{}
+	for i := 0; i < numField; i++ {
+		ft := t.Field(i)
+		fv := rv.Field(i)
+		tag := ft.Tag.Get("ltsv")
+		tags := strings.Split(tag, ",")
+		key := tags[0]
+		if key == "-" {
+			continue
+		}
+		if key == "" {
+			key = strings.ToLower(ft.Name)
+		}
+
+		switch fv.Kind() {
+		case reflect.String:
+			arr = append(arr, key+":"+fv.String())
+		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+			arr = append(arr, key+":"+strconv.FormatInt(fv.Int(), 10))
+		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+			arr = append(arr, key+":"+strconv.FormatUint(fv.Uint(), 10))
+		case reflect.Float32, reflect.Float64:
+			arr = append(arr, key+":"+strconv.FormatFloat(fv.Float(), 'f', -1, fv.Type().Bits()))
+		case reflect.Interface:
+			if u, ok := fv.Interface().(Marshaler); ok {
+				buf, err := u.MarshalLTSV()
+				if err != nil {
+					errs[ft.Name] = err
+				} else {
+					arr = append(arr, key+":"+string(buf))
+				}
+				continue
+			}
+			if u, ok := fv.Interface().(encoding.TextMarshaler); ok {
+				buf, err := u.MarshalText()
+				if err != nil {
+					errs[ft.Name] = err
+				} else {
+					arr = append(arr, key+":"+string(buf))
+				}
+				continue
+			}
+			fallthrough
+		default:
+			errs[ft.Name] = &MarshalTypeError{fv.String(), fv.Type()}
+		}
+	}
+	if len(errs) < 1 {
+		return []byte(strings.Join(arr, "\t")), nil
+	}
+	return nil, errs
 }
