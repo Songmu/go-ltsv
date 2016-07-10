@@ -98,10 +98,6 @@ func Unmarshal(data []byte, v interface{}) error {
 		ft := t.Field(i)
 		fv := rv.Field(i)
 
-		if !fv.CanSet() {
-			continue
-		}
-
 		tag := ft.Tag.Get("ltsv")
 		tags := strings.Split(tag, ",")
 		key := tags[0]
@@ -113,6 +109,16 @@ func Unmarshal(data []byte, v interface{}) error {
 		}
 		s, ok := l[key]
 		if !ok {
+			continue
+		}
+
+		if fv.Kind() == reflect.Ptr {
+			if fv.IsNil() {
+				fv.Set(reflect.New(fv.Type().Elem()))
+			}
+			fv = fv.Elem()
+		}
+		if !fv.CanSet() {
 			continue
 		}
 

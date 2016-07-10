@@ -86,6 +86,12 @@ func Marshal(v interface{}) ([]byte, error) {
 		if key == "" {
 			key = strings.ToLower(ft.Name)
 		}
+		if fv.Kind() == reflect.Ptr {
+			if fv.IsNil() {
+				continue
+			}
+			fv = fv.Elem()
+		}
 
 		switch fv.Kind() {
 		case reflect.String:
