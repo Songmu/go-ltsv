@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// Unmarshaler is the interface implemented by types that can unmarshal a ltsv
 type Unmarshaler interface {
 	UnmarshalLTSV([]byte) error
 }

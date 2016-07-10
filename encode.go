@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// Marshaler is the interface inmpemented by types that can marshal themselves
 type Marshaler interface {
 	MarshalLTSV() ([]byte, error)
 }
@@ -44,6 +45,7 @@ func (e *MarshalTypeError) Error() string {
 	return "ltsv: cannot marshal Go value " + e.Value + " of type " + e.Type.String() + " into ltsv"
 }
 
+// Marshal returns the LTSV encoding of v
 func Marshal(v interface{}) ([]byte, error) {
 	rv := reflect.ValueOf(v)
 	if rv.Kind() == reflect.Ptr {

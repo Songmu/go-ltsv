@@ -2,6 +2,7 @@ go-ltsv
 =======
 
 [![Build Status](https://travis-ci.org/Songmu/go-ltsv.png?branch=master)][travis]
+[![Coverage Status](https://coveralls.io/repos/Songmu/go-ltsv/badge.png?branch=master)][coveralls]
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)][license]
 [![GoDoc](https://godoc.org/github.com/Songmu/go-ltsv?status.svg)][godoc]
 
