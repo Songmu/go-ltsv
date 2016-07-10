@@ -1,6 +1,7 @@
 package ltsv
 
 import (
+	"encoding"
 	"fmt"
 	"reflect"
 	"strconv"
@@ -141,6 +142,13 @@ func Unmarshal(data []byte, v interface{}) error {
 		case reflect.Interface:
 			if u, ok := fv.Interface().(Unmarshaler); ok {
 				err := u.UnmarshalLTSV([]byte(s))
+				if err != nil {
+					errs[ft.Name] = err
+				}
+				continue
+			}
+			if tu, ok := fv.Interface().(encoding.TextUnmarshaler); ok {
+				err := tu.UnmarshalText([]byte(s))
 				if err != nil {
 					errs[ft.Name] = err
 				}
