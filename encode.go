@@ -8,11 +8,6 @@ import (
 	"strings"
 )
 
-// Marshaler is the interface inmpemented by types that can marshal themselves
-type Marshaler interface {
-	MarshalLTSV() ([]byte, error)
-}
-
 // MarshalError is an error type for Marshal()
 type MarshalError map[string]error
 
@@ -103,15 +98,6 @@ func Marshal(v interface{}) ([]byte, error) {
 		case reflect.Float32, reflect.Float64:
 			arr = append(arr, key+":"+strconv.FormatFloat(fv.Float(), 'f', -1, fv.Type().Bits()))
 		case reflect.Interface:
-			if u, ok := fv.Interface().(Marshaler); ok {
-				buf, err := u.MarshalLTSV()
-				if err != nil {
-					errs[ft.Name] = err
-				} else {
-					arr = append(arr, key+":"+string(buf))
-				}
-				continue
-			}
 			if u, ok := fv.Interface().(encoding.TextMarshaler); ok {
 				buf, err := u.MarshalText()
 				if err != nil {

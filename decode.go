@@ -8,11 +8,6 @@ import (
 	"strings"
 )
 
-// Unmarshaler is the interface implemented by types that can unmarshal a ltsv
-type Unmarshaler interface {
-	UnmarshalLTSV([]byte) error
-}
-
 // UnmarshalError is an error type for Unmarshal()
 type UnmarshalError map[string]error
 
@@ -147,13 +142,6 @@ func Unmarshal(data []byte, v interface{}) error {
 			}
 			fv.SetFloat(n)
 		case reflect.Interface:
-			if u, ok := fv.Interface().(Unmarshaler); ok {
-				err := u.UnmarshalLTSV([]byte(s))
-				if err != nil {
-					errs[ft.Name] = err
-				}
-				continue
-			}
 			if tu, ok := fv.Interface().(encoding.TextUnmarshaler); ok {
 				err := tu.UnmarshalText([]byte(s))
 				if err != nil {
