@@ -141,17 +141,16 @@ func Unmarshal(data []byte, v interface{}) error {
 				continue
 			}
 			fv.SetFloat(n)
-		case reflect.Interface:
-			if tu, ok := fv.Interface().(encoding.TextUnmarshaler); ok {
-				err := tu.UnmarshalText([]byte(s))
+		default:
+			u := indirect(fv)
+			if u == nil {
+				errs[ft.Name] = &UnmarshalTypeError{s, fv.Type()}
+			} else {
+				err := u.UnmarshalText([]byte(s))
 				if err != nil {
 					errs[ft.Name] = err
 				}
-				continue
 			}
-			fallthrough
-		default:
-			errs[ft.Name] = &UnmarshalTypeError{s, fv.Type()}
 		}
 	}
 
@@ -159,4 +158,34 @@ func Unmarshal(data []byte, v interface{}) error {
 		return nil
 	}
 	return errs
+}
+
+func indirect(v reflect.Value) encoding.TextUnmarshaler {
+	if v.Kind() != reflect.Ptr && v.Type().Name() != "" && v.CanAddr() {
+		v = v.Addr()
+	}
+	for {
+		if v.Kind() == reflect.Interface && !v.IsNil() {
+			e := v.Elem()
+			if e.Kind() == reflect.Ptr && !e.IsNil() && e.Elem().Kind() == reflect.Ptr {
+				v = e
+				continue
+			}
+		}
+		if v.Kind() != reflect.Ptr {
+			break
+		}
+		if v.Elem().Kind() != reflect.Ptr && v.CanSet() {
+			break
+		}
+		if v.IsNil() {
+			v.Set(reflect.New(v.Type().Elem()))
+		}
+		if v.Type().NumMethod() > 0 {
+			if u, ok := v.Interface().(encoding.TextUnmarshaler); ok {
+				return u
+			}
+		}
+	}
+	return nil
 }

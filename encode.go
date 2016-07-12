@@ -97,18 +97,21 @@ func Marshal(v interface{}) ([]byte, error) {
 			arr = append(arr, key+":"+strconv.FormatUint(fv.Uint(), 10))
 		case reflect.Float32, reflect.Float64:
 			arr = append(arr, key+":"+strconv.FormatFloat(fv.Float(), 'f', -1, fv.Type().Bits()))
-		case reflect.Interface:
-			if u, ok := fv.Interface().(encoding.TextMarshaler); ok {
-				buf, err := u.MarshalText()
-				if err != nil {
-					errs[ft.Name] = err
-				} else {
-					arr = append(arr, key+":"+string(buf))
-				}
-				continue
-			}
-			fallthrough
 		default:
+			if fv.Type().NumMethod() > 0 {
+				if u, ok := fv.Interface().(encoding.TextMarshaler); ok {
+					if u == nil {
+						continue
+					}
+					buf, err := u.MarshalText()
+					if err != nil {
+						errs[ft.Name] = err
+					} else {
+						arr = append(arr, key+":"+string(buf))
+					}
+					continue
+				}
+			}
 			errs[ft.Name] = &MarshalTypeError{fv.String(), fv.Type()}
 		}
 	}
