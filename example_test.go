@@ -27,7 +27,7 @@ type LogTime struct {
 }
 
 func (lt *LogTime) UnmarshalText(t []byte) error {
-	ti, err := time.Parse(timeFormat, string(t))
+	ti, err := time.ParseInLocation(timeFormat, string(t), time.UTC)
 	if err != nil {
 		return err
 	}
@@ -54,24 +54,14 @@ func ExampleUnmarshal() {
 	//             sec:  63603932404,
 	//             nsec: 0,
 	//             loc:  &time.Location{
-	//                 name: "Local",
+	//                 name: "",
 	//                 zone: {
-	//                     {name:"JCST", offset:32400, isDST:false},
-	//                     {name:"JDT", offset:36000, isDST:true},
-	//                     {name:"JST", offset:32400, isDST:false},
+	//                     {name:"", offset:32400, isDST:false},
 	//                 },
 	//                 tx: {
-	//                     {when:-1017824400, index:0x2, isstd:false, isutc:false},
-	//                     {when:-683794800, index:0x1, isstd:false, isutc:false},
-	//                     {when:-672393600, index:0x2, isstd:false, isutc:false},
-	//                     {when:-654764400, index:0x1, isstd:false, isutc:false},
-	//                     {when:-640944000, index:0x2, isstd:false, isutc:false},
-	//                     {when:-620290800, index:0x1, isstd:false, isutc:false},
-	//                     {when:-609494400, index:0x2, isstd:false, isutc:false},
-	//                     {when:-588841200, index:0x1, isstd:false, isutc:false},
-	//                     {when:-578044800, index:0x2, isstd:false, isutc:false},
+	//                     {when:-9223372036854775808, index:0x0, isstd:false, isutc:false},
 	//                 },
-	//                 cacheStart: -578044800,
+	//                 cacheStart: -9223372036854775808,
 	//                 cacheEnd:   9223372036854775807,
 	//                 cacheZone:  &time.zone{(CYCLIC REFERENCE)},
 	//             },
