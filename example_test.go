@@ -9,7 +9,7 @@ import (
 )
 
 type log struct {
-	Time    LogTime
+	Time    logTime
 	Host    net.IP
 	Req     string
 	Status  int
@@ -22,11 +22,11 @@ type log struct {
 
 const timeFormat = "2006-01-02T15:04:05Z07:00"
 
-type LogTime struct {
+type logTime struct {
 	time.Time
 }
 
-func (lt *LogTime) UnmarshalText(t []byte) error {
+func (lt *logTime) UnmarshalText(t []byte) error {
 	ti, err := time.ParseInLocation(timeFormat, string(t), time.UTC)
 	if err != nil {
 		return err
@@ -49,7 +49,7 @@ func ExampleUnmarshal() {
 	pretty.Println(l)
 	// Output:
 	// ltsv_test.log{
-	//     Time: ltsv_test.LogTime{
+	//     Time: ltsv_test.logTime{
 	//         Time: time.Time{
 	//             sec:  63603932404,
 	//             nsec: 0,
