@@ -109,6 +109,12 @@ func Unmarshal(data []byte, v interface{}) error {
 
 		if fv.Kind() == reflect.Ptr {
 			if fv.IsNil() {
+				if s == "-" {
+					switch fv.Type().Elem().Kind() {
+					case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Float32, reflect.Float64:
+						continue
+					}
+				}
 				fv.Set(reflect.New(fv.Type().Elem()))
 			}
 			fv = fv.Elem()
@@ -121,6 +127,9 @@ func Unmarshal(data []byte, v interface{}) error {
 		case reflect.String:
 			fv.SetString(s)
 		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+			if s == "-" {
+				continue
+			}
 			i, err := strconv.ParseInt(s, 10, 64)
 			if err != nil || fv.OverflowInt(i) {
 				errs[ft.Name] = &UnmarshalTypeError{"number " + s, fv.Type()}
@@ -128,6 +137,9 @@ func Unmarshal(data []byte, v interface{}) error {
 			}
 			fv.SetInt(i)
 		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+			if s == "-" {
+				continue
+			}
 			i, err := strconv.ParseUint(s, 10, 64)
 			if err != nil || fv.OverflowUint(i) {
 				errs[ft.Name] = &UnmarshalTypeError{"number " + s, fv.Type()}
@@ -135,6 +147,9 @@ func Unmarshal(data []byte, v interface{}) error {
 			}
 			fv.SetUint(i)
 		case reflect.Float32, reflect.Float64:
+			if s == "-" {
+				continue
+			}
 			n, err := strconv.ParseFloat(s, fv.Type().Bits())
 			if err != nil || fv.OverflowFloat(n) {
 				errs[ft.Name] = &UnmarshalTypeError{"number " + s, fv.Type()}
