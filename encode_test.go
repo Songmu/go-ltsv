@@ -1,48 +1,70 @@
 package ltsv
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
+
+var encodeTests = []struct {
+	Name   string
+	Input  interface{}
+	Output string
+	Check  func(s string) error
+}{
+	{
+		Name: "map",
+		Input: map[string]string{
+			"hoge": "fuga",
+			"piyo": "piyo",
+		},
+		Check: func(s string) error {
+			expect1 := "hoge:fuga\tpiyo:piyo"
+			expect2 := "piyo:piyo\thoge:fuga"
+			if s != expect1 && s != expect2 {
+				return fmt.Errorf("result is not expected: %s", s)
+			}
+			return nil
+		},
+	},
+	{
+		Name: "Simple",
+		Input: &ss{
+			User:   "songmu",
+			Age:    36,
+			Height: pfloat64(169.1),
+			Weight: 66.6,
+			Memo:   "songmu.jp",
+		},
+		Output: "user:songmu\tage:36\theight:169.1\tweight:66.6",
+	},
+	{
+		Name: "Omit memo",
+		Input: &ss{
+			User: "songmu",
+			Age:  36,
+			Memo: "songmu.jp",
+		},
+		Output: "user:songmu\tage:36\tweight:0",
+	},
+}
 
 func TestMarshal(t *testing.T) {
-	data := map[string]string{
-		"hoge": "fuga",
-		"piyo": "piyo",
-	}
-	expect1 := []byte("hoge:fuga\tpiyo:piyo")
-	expect2 := []byte("piyo:piyo\thoge:fuga")
-	r, _ := Marshal(data)
-	if string(r) != string(expect1) && string(r) != string(expect2) {
-		t.Errorf("result is not expected: %s", string(r))
-	}
-
-	type ss struct {
-		User   string   `ltsv:"user"`
-		Age    uint8    `ltsv:"age"`
-		Height *float64 `ltsv:"height"`
-		Weight float32
-		Memo   string `ltsv:"-"`
-	}
-	he := 169.1
-	s := &ss{
-		User:   "songmu",
-		Age:    36,
-		Height: &he,
-		Weight: 66.6,
-		Memo:   "songmu.jp",
-	}
-	expect := []byte("user:songmu\tage:36\theight:169.1\tweight:66.6")
-	buf, _ := Marshal(s)
-	if string(buf) != string(expect) {
-		t.Errorf("result is not expected: %s", string(buf))
-	}
-
-	s = &ss{
-		User: "songmu",
-		Age:  36,
-		Memo: "songmu.jp",
-	}
-	expect = []byte("user:songmu\tage:36\tweight:0")
-	buf, _ = Marshal(s)
-	if string(buf) != string(expect) {
-		t.Errorf("result is not expected: %s", string(buf))
+	for _, tt := range encodeTests {
+		t.Logf("testing: %s\n", tt.Name)
+		buf, err := Marshal(tt.Input)
+		if err != nil {
+			t.Errorf("%s(err): error should be nil but: %+v", tt.Name, err)
+		}
+		s := string(buf)
+		if tt.Check != nil {
+			err := tt.Check(s)
+			if err != nil {
+				t.Errorf("%s: %s", tt.Name, err)
+			}
+		} else {
+			if s != tt.Output {
+				t.Errorf("%s: out=%s, want=%s", tt.Name, s, tt.Output)
+			}
+		}
 	}
 }
