@@ -1,6 +1,7 @@
 package ltsv_test
 
 import (
+	"fmt"
 	"net"
 	"time"
 
@@ -9,7 +10,7 @@ import (
 )
 
 type log struct {
-	Time    logTime
+	Time    *logTime
 	Host    net.IP
 	Req     string
 	Status  int
@@ -46,27 +47,14 @@ func ExampleUnmarshal() {
 		"vhost:mackerel.io"
 	l := log{}
 	ltsv.Unmarshal([]byte(ltsvLog), &l)
+	t := l.Time
+	l.Time = nil
+	fmt.Println(t)
 	pretty.Println(l)
 	// Output:
+	// 2016-07-13 00:00:04 +0900 +0900
 	// ltsv_test.log{
-	//     Time: ltsv_test.logTime{
-	//         Time: time.Time{
-	//             sec:  63603932404,
-	//             nsec: 0,
-	//             loc:  &time.Location{
-	//                 name: "",
-	//                 zone: {
-	//                     {name:"", offset:32400, isDST:false},
-	//                 },
-	//                 tx: {
-	//                     {when:-9223372036854775808, index:0x0, isstd:false, isutc:false},
-	//                 },
-	//                 cacheStart: -9223372036854775808,
-	//                 cacheEnd:   9223372036854775807,
-	//                 cacheZone:  &time.zone{(CYCLIC REFERENCE)},
-	//             },
-	//         },
-	//     },
+	//     Time:    (*ltsv_test.logTime)(nil),
 	//     Host:    {0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xff, 0xff, 0xc0, 0x0, 0x2, 0x1},
 	//     Req:     "POST /api/v0/tsdb HTTP/1.1",
 	//     Status:  200,

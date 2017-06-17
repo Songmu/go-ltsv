@@ -64,4 +64,17 @@ func TestUnmarshal(t *testing.T) {
 	if !reflect.DeepEqual(s2, expect3) {
 		t.Errorf("result of data2map not expected: %#v", s2)
 	}
+
+	s3 := &ss{}
+	Unmarshal([]byte("user:songmu\tage:-\theight:-"), s3)
+	expect4 := &ss{
+		User: "songmu",
+		Age:  0,
+		// Height: nil,
+		Weight: 0.0,
+	}
+	if !reflect.DeepEqual(s3, expect4) {
+		t.Errorf("result of data2map not expected: %#v", s3)
+	}
+
 }
