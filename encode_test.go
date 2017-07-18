@@ -68,3 +68,32 @@ func TestMarshal(t *testing.T) {
 		}
 	}
 }
+
+func BenchmarkMarshalStruct(b *testing.B) {
+	input := &ss{
+		User:   "songmu",
+		Age:    36,
+		Height: pfloat64(169.1),
+		Weight: 66.6,
+		Memo:   "songmu.jp",
+	}
+	for i := 0; i < b.N; i++ {
+		_, err := Marshal(input)
+		if err != nil {
+			b.Error(err)
+		}
+	}
+}
+
+func BenchmarkMarshalMap(b *testing.B) {
+	input := map[string]string{
+		"hoge": "fuga",
+		"piyo": "piyo",
+	}
+	for i := 0; i < b.N; i++ {
+		_, err := Marshal(input)
+		if err != nil {
+			b.Error(err)
+		}
+	}
+}
