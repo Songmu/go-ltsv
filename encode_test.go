@@ -1,9 +1,21 @@
 package ltsv
 
 import (
+	"encoding"
+	"errors"
 	"fmt"
 	"testing"
 )
+
+type ms struct {
+	err error
+}
+
+func (s *ms) MarshalText() ([]byte, error) {
+	return []byte("ok"), s.err
+}
+
+var _ encoding.TextMarshaler = &ms{}
 
 var encodeTests = []struct {
 	Name   string
@@ -27,7 +39,18 @@ var encodeTests = []struct {
 		},
 	},
 	{
-		Name: "Simple",
+		Name: "Simple with nil pointer",
+		Input: &ss{
+			User:   "songmu",
+			Age:    36,
+			Height: nil,
+			Weight: 66.6,
+			Memo:   "songmu.jp",
+		},
+		Output: "user:songmu\tage:36\tweight:66.6",
+	},
+	{
+		Name: "Simple without nil pointer",
 		Input: &ss{
 			User:   "songmu",
 			Age:    36,
@@ -45,6 +68,26 @@ var encodeTests = []struct {
 			Memo: "songmu.jp",
 		},
 		Output: "user:songmu\tage:36\tweight:0",
+	},
+	{
+		Name: "Anthoer struct",
+		Input: &struct {
+			Name  string
+			Value int `ltsv:"answer"`
+		}{
+			Name:  "the Answer",
+			Value: 42,
+		},
+		Output: "name:the Answer\tanswer:42",
+	},
+	{
+		Name: "TextMarshaler",
+		Input: &struct {
+			Struct interface{}
+		}{
+			Struct: &ms{},
+		},
+		Output: "struct:ok",
 	},
 }
 
@@ -66,6 +109,28 @@ func TestMarshal(t *testing.T) {
 				t.Errorf("%s: out=%s, want=%s", tt.Name, s, tt.Output)
 			}
 		}
+	}
+}
+
+func TestMarshalError(t *testing.T) {
+	errOK := errors.New("ok")
+	s := struct {
+		A *ms
+		B *ms
+	}{
+		A: &ms{errOK},
+		B: &ms{errOK},
+	}
+
+	_, err := Marshal(s)
+	if err == nil {
+		t.Errorf("got no error")
+	}
+	if got := err.(MarshalError).OfField("a"); got != errOK {
+		t.Errorf("got error: %v", got)
+	}
+	if got := err.(MarshalError).OfField("b"); got != errOK {
+		t.Errorf("got error: %v", got)
 	}
 }
 
