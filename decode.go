@@ -44,14 +44,23 @@ type ltsvMap map[string]string
 
 func data2map(data []byte) (ltsvMap, error) {
 	d := string(data)
-	fields := strings.Split(d, "\t")
 	l := ltsvMap{}
-	for _, v := range fields {
-		kv := strings.SplitN(strings.TrimSpace(v), ":", 2)
-		if len(kv) != 2 {
+	var i int
+	var v string
+	for i < len(d) {
+		j := strings.IndexByte(d[i:], '\t')
+		if j >= 0 {
+			v = d[i : i+j]
+			i += j + 1
+		} else {
+			v = d[i:]
+			i = len(d)
+		}
+		k := strings.IndexByte(v, ':')
+		if k < 0 {
 			return nil, fmt.Errorf("not a ltsv: %s", d)
 		}
-		l[strings.TrimSpace(kv[0])] = strings.TrimSpace(kv[1])
+		l[strings.TrimSpace(v[:k])] = strings.TrimSpace(v[k+1:])
 	}
 	return l, nil
 }
