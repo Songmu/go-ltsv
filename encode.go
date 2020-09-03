@@ -66,9 +66,10 @@ func makeStructWriter(v reflect.Value) fieldWriter {
 	writers := make([]fieldWriter, n)
 	for i := 0; i < n; i++ {
 		ft := t.Field(i)
-		tag := ft.Tag.Get("ltsv")
-		tags := strings.Split(tag, ",")
-		key := tags[0]
+		key := ft.Tag.Get("ltsv")
+		if i := strings.IndexByte(key, ','); i >= 0 {
+			key = key[:i]
+		}
 		if key == "-" {
 			continue
 		}

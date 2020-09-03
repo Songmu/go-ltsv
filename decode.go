@@ -102,9 +102,10 @@ func Unmarshal(data []byte, v interface{}) error {
 		ft := t.Field(i)
 		fv := rv.Field(i)
 
-		tag := ft.Tag.Get("ltsv")
-		tags := strings.Split(tag, ",")
-		key := tags[0]
+		key := ft.Tag.Get("ltsv")
+		if i := strings.IndexByte(key, ','); i >= 0 {
+			key = key[:i]
+		}
 		if key == "-" {
 			continue
 		}
