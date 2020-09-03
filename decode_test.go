@@ -96,3 +96,15 @@ func TestUnmarshal(t *testing.T) {
 		}
 	}
 }
+
+func BenchmarkUnmarshalStruct(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		for _, tt := range decodeTests {
+			s := &ss{}
+			err := Unmarshal([]byte(tt.Input), s)
+			if err != nil {
+				b.Error(err)
+			}
+		}
+	}
+}
