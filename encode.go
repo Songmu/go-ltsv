@@ -94,6 +94,8 @@ func makeStructWriter(v reflect.Value) fieldWriter {
 			writer = makeUintWriter(key)
 		case reflect.Float32, reflect.Float64:
 			writer = makeFloatWriter(key)
+		case reflect.Bool:
+			writer = makeBoolWriter(key)
 		default:
 			dereference = false
 			writer = makeInterfaceWriter(key)
@@ -180,6 +182,13 @@ func makeUintWriter(key string) fieldWriter {
 func makeFloatWriter(key string) fieldWriter {
 	return fieldWriter(func(w io.Writer, v reflect.Value) error {
 		writeField(w, key, strconv.FormatFloat(v.Float(), 'f', -1, v.Type().Bits()))
+		return nil
+	})
+}
+
+func makeBoolWriter(key string) fieldWriter {
+	return fieldWriter(func(w io.Writer, v reflect.Value) error {
+		writeField(w, key, strconv.FormatBool(v.Bool()))
 		return nil
 	})
 }

@@ -23,11 +23,12 @@ func TestData2Map(t *testing.T) {
 }
 
 type ss struct {
-	User   string   `ltsv:"user"`
-	Age    uint8    `ltsv:"age"`
-	Height *float64 `ltsv:"height"`
-	Weight float32
-	Memo   string `ltsv:"-"`
+	User          string   `ltsv:"user"`
+	Age           uint8    `ltsv:"age"`
+	Height        *float64 `ltsv:"height"`
+	Weight        float32
+	EmailVerified bool   `ltsv:"email_verified"`
+	Memo          string `ltsv:"-"`
 }
 
 func pfloat64(f float64) *float64 {
@@ -41,32 +42,35 @@ var decodeTests = []struct {
 }{
 	{
 		Name:  "Simple",
-		Input: "user:songmu\tage:36\theight:169.1\tweight:66.6",
+		Input: "user:songmu\tage:36\theight:169.1\tweight:66.6\temail_verified:true",
 		Output: &ss{
-			User:   "songmu",
-			Age:    36,
-			Height: pfloat64(169.1),
-			Weight: 66.6,
+			User:          "songmu",
+			Age:           36,
+			Height:        pfloat64(169.1),
+			Weight:        66.6,
+			EmailVerified: true,
 		},
 	},
 	{
 		Name:  "Default values",
 		Input: "user:songmu\tage:36",
 		Output: &ss{
-			User:   "songmu",
-			Age:    36,
-			Height: nil,
-			Weight: 0.0,
+			User:          "songmu",
+			Age:           36,
+			Height:        nil,
+			Weight:        0.0,
+			EmailVerified: false,
 		},
 	},
 	{
 		Name:  "Hyphen and empty string as null number",
 		Input: "user:songmu\tage:\theight:-",
 		Output: &ss{
-			User:   "songmu",
-			Age:    0,
-			Height: nil,
-			Weight: 0.0,
+			User:          "songmu",
+			Age:           0,
+			Height:        nil,
+			Weight:        0.0,
+			EmailVerified: false,
 		},
 	},
 }
