@@ -1,16 +1,18 @@
-test: deps
+u := $(if $(update),-u)
+
+.PHONY: deps
+deps:
+	go get ${u} -d
+	go mod tidy
+
+.PHONY: devel-deps
+devel-deps:
+	go install github.com/Songmu/godzil/cmd/godzil@latest
+
+.PHONY: test
+test:
 	go test
 
-deps:
-	go get -d -v -t ./...
-	go get golang.org/x/lint/golint
-	go get github.com/mattn/goveralls
-
-lint: deps
-	go vet
-	golint -set_exit_status
-
-cover: deps
-	goveralls
-
-.PHONY: test deps lint cover
+.PHONY: release
+release: devel-deps
+	godzil release
