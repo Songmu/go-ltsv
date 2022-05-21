@@ -48,7 +48,7 @@ var encodeTests = []struct {
 			EmailVerified: true,
 			Memo:          "songmu.jp",
 		},
-		Output: "user:songmu\tage:36\tweight:66.6",
+		Output: "user:songmu\tage:36\tweight:66.6\temail_verified:true",
 	},
 	{
 		Name: "Simple without nil pointer",
@@ -60,7 +60,7 @@ var encodeTests = []struct {
 			EmailVerified: false,
 			Memo:          "songmu.jp",
 		},
-		Output: "user:songmu\tage:36\theight:169.1\tweight:66.6",
+		Output: "user:songmu\tage:36\theight:169.1\tweight:66.6\temail_verified:false",
 	},
 	{
 		Name: "Omit memo",
@@ -69,7 +69,7 @@ var encodeTests = []struct {
 			Age:  36,
 			Memo: "songmu.jp",
 		},
-		Output: "user:songmu\tage:36\tweight:0",
+		Output: "user:songmu\tage:36\tweight:0\temail_verified:false",
 	},
 	{
 		Name: "Anthoer struct",
@@ -108,7 +108,7 @@ func TestMarshal(t *testing.T) {
 			}
 		} else {
 			if s != tt.Output {
-				t.Errorf("%s: out=%s, want=%s", tt.Name, s, tt.Output)
+				t.Errorf("%s:\n  out =%s\n  want=%s", tt.Name, s, tt.Output)
 			}
 		}
 	}

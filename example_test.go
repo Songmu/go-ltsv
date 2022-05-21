@@ -1,7 +1,6 @@
 package ltsv_test
 
 import (
-	"fmt"
 	"net"
 	"time"
 
@@ -47,14 +46,10 @@ func ExampleUnmarshal() {
 		"vhost:mackerel.io"
 	l := log{}
 	ltsv.Unmarshal([]byte(ltsvLog), &l)
-	t := l.Time
-	l.Time = nil
-	fmt.Println(t)
 	pretty.Println(l)
 	// Output:
-	// 2016-07-13 00:00:04 +0900 +0900
 	// ltsv_test.log{
-	//     Time:    (*ltsv_test.logTime)(nil),
+	//     Time:    time.Date(2016, time.July, 13, 0, 0, 4, 0, time.Location("")),
 	//     Host:    {0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0xff, 0xff, 0xc0, 0x0, 0x2, 0x1},
 	//     Req:     "POST /api/v0/tsdb HTTP/1.1",
 	//     Status:  200,
