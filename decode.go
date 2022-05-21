@@ -166,6 +166,16 @@ func Unmarshal(data []byte, v interface{}) error {
 				continue
 			}
 			fv.SetFloat(n)
+		case reflect.Bool:
+			if potentiallyNull {
+				continue
+			}
+			b, err := strconv.ParseBool(s)
+			if err != nil {
+				errs[ft.Name] = &UnmarshalTypeError{Value: "bool " + s, Type: fv.Type()}
+				continue
+			}
+			fv.SetBool(b)
 		default:
 			u := indirect(fv)
 			if u == nil {
